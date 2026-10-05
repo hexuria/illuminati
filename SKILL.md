@@ -108,88 +108,15 @@ A question widget, a secret prompt, and a cloud-agent card are controls. They ar
 
 Pick one primary artifact. You may add a short Markdown caption. Do not dump every format.
 
-## Explain
+## Verify
 
-ASD-STE100 is a controlled language for technical procedures. These rules are a working subset, not the official specification. Default to about 80% of the way: follow the rules, but keep a needed technical term, or a slightly longer sentence, rather than awkward phrasing. Use the strict form only if the reader asks.
+Before you hand the result over, answer three questions:
 
-- A step is about 20 words or fewer. A descriptive sentence is about 25 words or fewer.
-- A paragraph is about 6 sentences. One topic per paragraph.
-- One instruction per sentence. Use the imperative for a step.
-- Active voice. Name who or what does the action.
-- Simple present, past, or future. Do not drop "the" or "a" to save words.
-- One word, one meaning. Do not swap synonyms.
-- Plain words. No idioms.
-- A warning is its own short sentence, before the step it protects.
-- Use a list for a sequence or for parallel items.
-- Do not stack nouns. Use a preposition.
+1. Can the reader say what the thing does?
+2. Is each technical name the same name the source uses?
+3. Did a shorter sentence drop a condition, a unit, a failure mode, or a name?
 
-Optional check, from this skill folder: `scripts/verify_ste <file>`. It fails a sentence over 25 words and the filler words various, etc., appropriate, simply, and just. Passive voice is a warning only. Fix a hard failure before you climb. The checker is not the official dictionary.
+If any answer is no, fix that. Do not add another format to hide it.
 
-Full notes: `references/ste100.md`.
+When the thing to understand is work you just did, name the few decisions that matter and the risk of each. Tie each claim to a file or a test the reader can open.
 
-## Visualize
-
-Prefer a diagram over paragraphs for architecture, data flow, dependencies, sequences, state, ownership, timelines, and before/after.
-
-Lightest tool that works:
-
-1. Mermaid in a fenced `mermaid` block in the chat (flowchart, sequenceDiagram, stateDiagram, classDiagram, erDiagram). In Grok Bot this is the diagram. Do not also attach the same diagram as an image.
-2. Inline SVG in the HTML page when the layout must be custom.
-3. A PNG or SVG file when the reader must paste it into slides or a doc.
-
-Label every box and every edge. Keep about 12 nodes. Split a larger picture into several diagrams. After the diagram, write 1 to 3 sentences that say what to look at. Do not retell the diagram.
-
-Optional check: `scripts/render_diagram <file.mmd>`. It accepts a file that starts with a mermaid keyword. It writes an SVG only if `mmdc` is installed.
-
-Notes: `references/diagram.md`.
-
-## Demonstrate and Simulate
-
-Demonstrate is one worked case the reader can follow. Simulate is the same case with a control that changes an input. If there is no control, stop at Demonstrate.
-
-- One self-contained `.html` file. Inline CSS and JS. No build step. No required network. A CDN script is allowed only if it adds real value and the page still shows the core content without it.
-- A clear title and a two-sentence summary at the top.
-- Collapsible sections, tabs, or a table of contents when the page is long.
-- Controls that teach: a slider, a step button, a filter, a side-by-side compare, a clickable node. Motion only when it shows cause and effect.
-- Real content. No placeholder text.
-- System font, strong contrast, line width about 70 characters, usable in dark and light, usable on a narrow window.
-- Save it under a relative path such as `./explainers/<topic>.html`. In Grok Bot, attach that file in the chat. Elsewhere, open it (`open` on macOS, `xdg-open` on Linux). If you can load it, look at it and fix layout bugs before you hand it over.
-- It is disposable. Do not commit it unless the reader asks.
-
-Optional check: `scripts/verify_html <file>`. It requires a title, balanced tags, and no external `http` or `https` URL in `src` or `href`.
-
-Notes: `references/interactive-html.md`.
-
-## Animate
-
-Use this when the reader asks, or when a still page cannot show a change over time. It may fail. Say so if it does.
-
-1. Write a scene script first: hook, intuition, build-up, example, recap. Narration follows the Explain rules. If the render will take long, show the script before you render.
-2. Animation: Manim Community Edition if `python -c "import manim"` works. Otherwise say what is missing. Do not pretend a video exists.
-3. Narration: if `ELEVENLABS_API_KEY` is already in the environment, you may use it. Never ask the reader to paste a key into chat. Never print the key. If it is not set, use a local speech tool that is already installed, and say the quality trade-off.
-4. Assemble with ffmpeg. Match each scene length to its audio clip. Add captions if that is cheap.
-5. Render a low-quality draft first. Render the final file only after the draft pacing is right.
-6. Deliver the `.mp4` path, the duration, and two sentences on what it covers. Keep it about 2 to 5 minutes unless asked for longer.
-
-If render or speech fails and you cannot fix it, say that and fall back to Simulate.
-
-`scripts/render_video` only checks that a storyboard has the headings Hook, Mechanism, and Check. It does not make a video.
-
-Notes: `references/explainer-video.md`.
-
-## Oversight
-
-When the thing to understand is work you just did (a large diff, a refactor, a research result):
-
-- Lead with a diagram or a page of what changed and why. Do not lead with a changelog.
-- Name the 3 to 5 decisions that matter, and the risks, in short bullets.
-- Tie each claim to a file, a line, or a test result the reader can open.
-- If you already answered in prose and the topic was large, offer one diagram or one page. Do not offer a menu.
-
-## Pitfalls
-
-- Do not pick a later step only because it looks more finished.
-- Do not use this controlled style for persuasion or fiction. It is for explanation and procedures.
-- Do not ship a diagram or a page whose claims you did not check. A clear wrong picture is worse than plain text.
-- Do not hand over an HTML file you did not open or render.
-- Do not write a secret into a generated file.
