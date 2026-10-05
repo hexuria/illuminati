@@ -37,6 +37,34 @@ Each higher rung is usually easier to check than the one below it.
 - Ask one question of yourself: will a person read this, or check this? If they will check it, use a diagram or a page.
 - Do not climb only to look thorough. A three-sentence answer stays three sentences.
 
+
+## Grok Bot surfaces
+
+When you run inside Grok Bot, deliver on a surface this chat can actually show. Do not invent a viewer.
+
+In the message:
+
+- Markdown, including lists and tables. This is rung 1, and the caption under any higher rung.
+- A Mermaid diagram, in a fenced `mermaid` block. This is the default rung 2. It renders in the chat.
+- Math, with `\( ... \)` inline and `$$ ... $$` on its own line.
+- An image, attached on the same message. Use this when a diagram is not Mermaid (a chart, a screenshot, an SVG or PNG).
+- A video, as its own attachment. This is rung 4, and only after a real render.
+- A voice memo, only when the reader asked to hear the answer.
+
+As a file attached to the message, when the artifact is bigger than a chat bubble:
+
+- HTML, when the reader must click, compare, or step through.
+- CSV or TSV, when the reader must sort, filter, or open rows in a spreadsheet. A small comparison stays a Markdown table.
+- PDF, when the reader must keep a fixed document.
+- A Markdown file, when the controlled text is too long for the bubble.
+- SVG or PNG, when the picture must leave the chat.
+
+Do not claim a separate HTML viewer, PDF viewer, or document viewer. Attach the file. If the app previews it, that is extra. The file must still stand on its own.
+
+A question widget, a secret prompt, and a cloud-agent card are controls. They are not rungs. Do not use them to explain.
+
+Pick one primary artifact. You may add a short Markdown caption. Do not dump every format.
+
 ## Rung 1: controlled text
 
 ASD-STE100 is a controlled language for technical procedures. These rules are a working subset, not the official specification. Default to about 80% of the way: follow the rules, but keep a needed technical term, or a slightly longer sentence, rather than awkward phrasing. Use the strict form only if the reader asks.
@@ -62,7 +90,7 @@ Prefer a diagram over paragraphs for architecture, data flow, dependencies, sequ
 
 Lightest tool that works:
 
-1. Mermaid in a fenced block (flowchart, sequenceDiagram, stateDiagram, classDiagram, erDiagram).
+1. Mermaid in a fenced `mermaid` block in the chat (flowchart, sequenceDiagram, stateDiagram, classDiagram, erDiagram). In Grok Bot this is the diagram. Do not also attach the same diagram as an image.
 2. Inline SVG in the HTML page when the layout must be custom.
 3. A PNG or SVG file when the reader must paste it into slides or a doc.
 
@@ -82,7 +110,7 @@ For complex output, ask "can this be a page?"
 - Controls that teach: a slider, a step button, a filter, a side-by-side compare, a clickable node. Motion only when it shows cause and effect.
 - Real content. No placeholder text.
 - System font, strong contrast, line width about 70 characters, usable in dark and light, usable on a narrow window.
-- Save it under a relative path such as `./explainers/<topic>.html`. Open it (`open` on macOS, `xdg-open` on Linux). If you can load it, look at it and fix layout bugs before you hand it over.
+- Save it under a relative path such as `./explainers/<topic>.html`. In Grok Bot, attach that file in the chat. Elsewhere, open it (`open` on macOS, `xdg-open` on Linux). If you can load it, look at it and fix layout bugs before you hand it over.
 - It is disposable. Do not commit it unless the reader asks.
 
 Optional check: `scripts/verify_html <file>`. It requires a title, balanced tags, and no external `http` or `https` URL in `src` or `href`.

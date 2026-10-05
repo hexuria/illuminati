@@ -1,23 +1,36 @@
 # illuminati
 
-An agent skill that picks a format a person can check, instead of a wall of prose.
+A skill that picks a form a person can check, instead of a wall of prose.
 
-The decision model follows [subhams07/Output-for-Best-Understanding](https://github.com/subhams07/Output-for-Best-Understanding), which is based on Andrej Karpathy's note from 2 Oct 2026. This repository is our own wording and checkers. It is not that project.
+The goal is understanding. After hard work, the reader should be able to say what a thing does, how the pieces connect, and what to verify. The skill chooses the lightest form that makes that check possible, then stops.
 
-## Ladder
+## What it produces
 
-Each higher rung is usually easier to check than the one below. For anything that is not a few sentences, start at a diagram or a page.
+| Form | Use when |
+| --- | --- |
+| Controlled text | The answer fits in a few sentences, or you need a caption under a richer form |
+| Diagram | The reader must see structure, flow, architecture, or a sequence |
+| Interactive page, table, or document | The reader must explore, compare, step through, or keep the result |
+| Short explainer video | The idea changes over time, or the reader asked for a video |
 
-| Rung | Format | Use when |
-| --- | --- | --- |
-| 1 | Controlled text, about 80% of the way to ASD-STE100 | A short answer, or the caption under a higher rung |
-| 2 | Diagram (Mermaid, else SVG) | Structure, flow, architecture, sequence |
-| 3 | One self-contained interactive HTML page | Explore, compare, or step through |
-| 4 | Short explainer video | Dense idea, or the reader asked for a video |
+Controlled text stays about 80% of the way to ASD-STE100: short sentences, one word for one thing, the actor named, a warning in its own sentence. That is a working subset in `references/ste100.md`. It is not the official specification.
 
-Video is not the default. Say the render cost before you start one. If it fails, fall back to the HTML page and say so.
+In Grok Bot, put the result on a surface the chat can show:
 
-The ASD-STE100 notes here are a working subset, not the official specification. See [asd-ste100.org](https://www.asd-ste100.org/).
+- Markdown in the message, including a table when the comparison is small
+- A Mermaid diagram in a fenced block
+- An image on the same message, when the picture is not Mermaid
+- An attached HTML file, CSV, PDF, longer Markdown file, or video, when the artifact is bigger than the bubble
+
+Do not assume a separate viewer. The file has to stand on its own. A question widget and a cloud-agent card are controls, not explanations.
+
+## How to run it
+
+1. Read `SKILL.md`.
+2. Name the one thing the reader must be able to say.
+3. For anything past a few sentences, start with a diagram or a page. Stay on text only when the whole answer is short.
+4. Use a video only when the reader asks, or when a still page cannot show change over time. Say the cost first.
+5. Optional checks live in `scripts/`. Call them by a path relative to this folder.
 
 ## Layout
 
@@ -36,8 +49,4 @@ illuminati/
     └── render_video
 ```
 
-The scripts are optional checks. Call them by a path relative to this folder (`scripts/verify_ste`). They do not replace the ladder in `SKILL.md`.
-
-## Install
-
-Copy this folder into the skills directory your agent reads. Restart the session so it picks the skill up.
+Copy this folder into the skills directory your agent reads, then start a new session.
