@@ -6,12 +6,13 @@ The goal is understanding. After hard work, the reader should be able to say wha
 
 ## What it produces
 
-| Form | Use when |
-| --- | --- |
-| Controlled text | The answer fits in a few sentences, or you need a caption under a richer form |
-| Diagram | The reader must see structure, flow, architecture, or a sequence |
-| Interactive page, table, or document | The reader must explore, compare, step through, or keep the result |
-| Short explainer video | The idea changes over time, or the reader asked for a video |
+| Step | The reader can | Deliver |
+| --- | --- | --- |
+| Explain | Say what it does | Short controlled text, or a small Markdown table |
+| Visualize | See how the pieces connect | A Mermaid diagram, or an image when Mermaid cannot say it |
+| Demonstrate | Walk one real case | An attached page, CSV, PDF, or longer Markdown file |
+| Simulate | Change an input and see the result | One interactive HTML file |
+| Animate | Watch the change over time | A short video, only when a still page cannot show it |
 
 Controlled text stays about 80% of the way to ASD-STE100: short sentences, one word for one thing, the actor named, a warning in its own sentence. That is a working subset in `references/ste100.md`. It is not the official specification.
 
@@ -28,8 +29,8 @@ Do not assume a separate viewer. The file has to stand on its own. A question wi
 
 1. Read `SKILL.md`.
 2. Name the one thing the reader must be able to say.
-3. For anything past a few sentences, start with a diagram or a page. Stay on text only when the whole answer is short.
-4. Use a video only when the reader asks, or when a still page cannot show change over time. Say the cost first.
+3. Stay on Explain when a few sentences are enough. Move to Visualize, Demonstrate, or Simulate only when that check is still blind.
+4. Animate only when the reader asks, or when a still page cannot show change over time. Say the cost first.
 5. Optional checks live in `scripts/`. Call them by a path relative to this folder.
 
 ## Layout
