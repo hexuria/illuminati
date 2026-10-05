@@ -1,57 +1,124 @@
 ---
 name: illuminati
 description: >
-  Explains a hard idea by climbing a short ladder: controlled prose first,
-  then a diagram, then one interactive HTML page, then a video script only
-  if the idea is temporal or too dense for one view. Use when the user asks
-  to understand, explain, walk through, compare, or oversee complex work,
-  when they type /illuminati, or after an agent finishes complex work and
-  the reader still needs to see how the pieces connect.
+  Use when someone wants to understand, review, or oversee something complex
+  (code, a system, a paper, a plan, a concept, or an agent's own work).
+  Pick the most digestible format instead of a wall of prose: controlled
+  text, then a diagram, then one interactive HTML page, then an explainer
+  video. Also when they type /illuminati.
 ---
 
 # illuminati
 
-Use this skill when a reader must understand a mechanism, a flow, or the result of complex work. The name is the invocation. Do not wait for the reader to name a format.
+Source idea: Andrej Karpathy, "We'll be spending a lot more time trying to understand the outputs of language models" (2 Oct 2026). The rung choices follow the public skill in [subhams07/Output-for-Best-Understanding](https://github.com/subhams07/Output-for-Best-Understanding). This file is our wording of that decision model. It is not that repository.
 
-This is a comprehension and rendering skill for agents. It is not a general writing style. Write the explanation, then prove it with the scripts in `scripts/`. Rules in this file are the short form. The full working rules are in `references/`.
+Premise: code is cheap, so a custom diagram, page, or short video is worth making when it helps a person check the work. Do not default to long prose.
 
-This file is not the ASD-STE100 specification. Do not claim compliance with that specification.
+## Trigger
 
-## Routing
+Use this when the reader says "explain", "help me understand", "walk me through", "what did you just change", "summarize this", or "make this easier to follow". Also use it when a plain-text answer would be long, dense, or split into parts.
 
-Climb in this order. After each artifact, ask one question: can the reader answer the original question with what you have now? If yes, stop. Do not add a diagram, a page, or a video to show effort.
+## The ladder
 
-1. **Name the question.** Write one sentence: "The reader must be able to say what X does." If you cannot name it, you are not ready to explain it.
-2. **Controlled text.** Always write this first. Follow `references/ste100.md`. Save markdown or text. Run `scripts/verify_ste`. Fix hard failures before you climb.
-3. **Diagram.** Climb only if the idea is spatial, architectural, or a flow the reader must see. Follow `references/diagram.md`. Run `scripts/render_diagram` on the `.mmd` file.
-4. **Interactive HTML.** Climb only if the reader must explore, compare, or change an assumption ("what if"). Follow `references/interactive-html.md`. Run `scripts/verify_html`. One file. One question.
-5. **Explainer video script.** Climb only if the idea is a sequence in time, or if it is too dense to hold in one view. Follow `references/explainer-video.md`. The script must already pass `scripts/verify_ste`. Run `scripts/render_video`. Do not render a video unless the reader asked for a video and the tools exist. A storyboard is a complete result.
+Each higher rung is usually easier to check than the one below it.
 
-Cheap levels are better. Text is cheaper than a diagram. A diagram is cheaper than a page. A page is cheaper than a video.
+| Rung | Format | Use when | Cost |
+| --- | --- | --- | --- |
+| 1 | Controlled text, about 80% of the way to ASD-STE100 | The answer fits in a few sentences, or you need a short summary under a higher rung | Lowest |
+| 2 | Diagram | Structure, flow, architecture, state, sequence, before and after | Low |
+| 3 | One interactive HTML page | Parts to explore, compare, step through, or animate | Medium |
+| 4 | Explainer video | A dense concept the reader must internalize, or they asked for a video | Highest |
 
-## What you write at the desk
+### How to choose
 
-Keep these rules in view. The checker does not replace them.
+- For anything that is not trivial, start at rung 2 or rung 3. Stay on rung 1 only when the whole answer fits in a few sentences.
+- Use rung 4 only when the reader asks for a video, or the topic is dense and they have time to watch. Say the cost first (render time, and an API key only if narration needs one).
+- If you are unsure, deliver the short rung-1 summary and offer one higher rung. Do not ask a list of questions.
+- Ask one question of yourself: will a person read this, or check this? If they will check it, use a diagram or a page.
+- Do not climb only to look thorough. A three-sentence answer stays three sentences.
 
-- One idea in each sentence. Put the actor first.
-- Keep a descriptive sentence at or under 25 words. One action in an instruction.
-- Use one word for one thing. Do not switch synonyms.
-- Define a new term once, in one sentence, then keep that term.
-- Do not use a metaphor as a stand-in for the mechanism.
-- Put a warning in its own paragraph. Do not hide it inside a step.
-- Banned filler, and the checker fails on these words: various, etc., appropriate, simply, just.
+## Rung 1: controlled text
 
-## After complex work
+ASD-STE100 is a controlled language for technical procedures. These rules are a working subset, not the official specification. Default to about 80% of the way: follow the rules, but keep a needed technical term, or a slightly longer sentence, rather than awkward phrasing. Use the strict form only if the reader asks.
 
-When you finish a design, a change, or a trace, run this skill on the result before you hand it over. Explain the mechanism the reader must check. Do not explain the chronology of your attempts.
+- A step is about 20 words or fewer. A descriptive sentence is about 25 words or fewer.
+- A paragraph is about 6 sentences. One topic per paragraph.
+- One instruction per sentence. Use the imperative for a step.
+- Active voice. Name who or what does the action.
+- Simple present, past, or future. Do not drop "the" or "a" to save words.
+- One word, one meaning. Do not swap synonyms.
+- Plain words. No idioms.
+- A warning is its own short sentence, before the step it protects.
+- Use a list for a sequence or for parallel items.
+- Do not stack nouns. Use a preposition.
 
-## Harness
+Optional check, from this skill folder: `scripts/verify_ste <file>`. It fails a sentence over 25 words and the filler words various, etc., appropriate, simply, and just. Passive voice is a warning only. Fix a hard failure before you climb. The checker is not the official dictionary.
 
-| Check | Script | Pass means |
-| --- | --- | --- |
-| Prose | `scripts/verify_ste` | No sentence over 25 words. No banned filler. Passive voice is a warning only. |
-| Diagram | `scripts/render_diagram` | The `.mmd` file starts with a mermaid keyword. An SVG is written only if `mmdc` is installed. |
-| Page | `scripts/verify_html` | One self-contained HTML file. Title present. No external URL. Tags balance. |
-| Video script | `scripts/render_video` | Headings `Hook`, `Mechanism`, and `Check` exist. No video file is required. |
+Full notes: `references/ste100.md`.
 
-Read the matching file in `references/` before you write that artifact.
+## Rung 2: diagram
+
+Prefer a diagram over paragraphs for architecture, data flow, dependencies, sequences, state, ownership, timelines, and before/after.
+
+Lightest tool that works:
+
+1. Mermaid in a fenced block (flowchart, sequenceDiagram, stateDiagram, classDiagram, erDiagram).
+2. Inline SVG in the HTML page when the layout must be custom.
+3. A PNG or SVG file when the reader must paste it into slides or a doc.
+
+Label every box and every edge. Keep about 12 nodes. Split a larger picture into several diagrams. After the diagram, write 1 to 3 sentences that say what to look at. Do not retell the diagram.
+
+Optional check: `scripts/render_diagram <file.mmd>`. It accepts a file that starts with a mermaid keyword. It writes an SVG only if `mmdc` is installed.
+
+Notes: `references/diagram.md`.
+
+## Rung 3: HTML page
+
+For complex output, ask "can this be a page?"
+
+- One self-contained `.html` file. Inline CSS and JS. No build step. No required network. A CDN script is allowed only if it adds real value and the page still shows the core content without it.
+- A clear title and a two-sentence summary at the top.
+- Collapsible sections, tabs, or a table of contents when the page is long.
+- Controls that teach: a slider, a step button, a filter, a side-by-side compare, a clickable node. Motion only when it shows cause and effect.
+- Real content. No placeholder text.
+- System font, strong contrast, line width about 70 characters, usable in dark and light, usable on a narrow window.
+- Save it under a relative path such as `./explainers/<topic>.html`. Open it (`open` on macOS, `xdg-open` on Linux). If you can load it, look at it and fix layout bugs before you hand it over.
+- It is disposable. Do not commit it unless the reader asks.
+
+Optional check: `scripts/verify_html <file>`. It requires a title, balanced tags, and no external `http` or `https` URL in `src` or `href`.
+
+Notes: `references/interactive-html.md`.
+
+## Rung 4: explainer video
+
+Use this when the reader asks, or when a still page cannot show a change over time. It may fail. Say so if it does.
+
+1. Write a scene script first: hook, intuition, build-up, example, recap. Narration follows the rung-1 rules. If the render will take long, show the script before you render.
+2. Animation: Manim Community Edition if `python -c "import manim"` works. Otherwise say what is missing. Do not pretend a video exists.
+3. Narration: if `ELEVENLABS_API_KEY` is already in the environment, you may use it. Never ask the reader to paste a key into chat. Never print the key. If it is not set, use a local speech tool that is already installed, and say the quality trade-off.
+4. Assemble with ffmpeg. Match each scene length to its audio clip. Add captions if that is cheap.
+5. Render a low-quality draft first. Render the final file only after the draft pacing is right.
+6. Deliver the `.mp4` path, the duration, and two sentences on what it covers. Keep it about 2 to 5 minutes unless asked for longer.
+
+If render or speech fails and you cannot fix it, say that and fall back to rung 3.
+
+`scripts/render_video` only checks that a storyboard has the headings Hook, Mechanism, and Check. It does not make a video.
+
+Notes: `references/explainer-video.md`.
+
+## Oversight
+
+When the thing to understand is work you just did (a large diff, a refactor, a research result):
+
+- Lead with a diagram or a page of what changed and why. Do not lead with a changelog.
+- Name the 3 to 5 decisions that matter, and the risks, in short bullets.
+- Tie each claim to a file, a line, or a test result the reader can open.
+- If you already answered in prose and the topic was large, offer one diagram or one page. Do not offer a menu.
+
+## Pitfalls
+
+- Do not pick a higher rung only because it looks more finished.
+- Do not use this controlled style for persuasion or fiction. It is for explanation and procedures.
+- Do not ship a diagram or a page whose claims you did not check. A clear wrong picture is worse than plain text.
+- Do not hand over an HTML file you did not open or render.
+- Do not write a secret into a generated file.

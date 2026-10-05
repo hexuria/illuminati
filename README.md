@@ -1,36 +1,29 @@
 # illuminati
 
-An agent skill for a short understanding ladder:
+An agent skill that picks a format a person can check, instead of a wall of prose.
 
-1. Controlled prose, in the spirit of ASD-STE100 (a working subset, not the official specification).
-2. A diagram, when the reader must see structure or flow.
-3. One self-contained interactive HTML page, when the reader must explore or compare.
-4. An explainer storyboard, when the idea is temporal or too dense for one view.
+The decision model follows [subhams07/Output-for-Best-Understanding](https://github.com/subhams07/Output-for-Best-Understanding), which is based on Andrej Karpathy's note from 2 Oct 2026. This repository is our own wording and checkers. It is not that project.
 
-Stop at the cheapest level that answers the question. A video is not the default.
+## Ladder
 
-The folder name and the invocation are both `illuminati`.
+Each higher rung is usually easier to check than the one below. For anything that is not a few sentences, start at a diagram or a page.
 
-## How an agent runs it
+| Rung | Format | Use when |
+| --- | --- | --- |
+| 1 | Controlled text, about 80% of the way to ASD-STE100 | A short answer, or the caption under a higher rung |
+| 2 | Diagram (Mermaid, else SVG) | Structure, flow, architecture, sequence |
+| 3 | One self-contained interactive HTML page | Explore, compare, or step through |
+| 4 | Short explainer video | Dense idea, or the reader asked for a video |
 
-1. Read `SKILL.md`.
-2. Write the question the reader must be able to answer.
-3. Write the explanation in controlled prose.
-4. Run `scripts/verify_ste` on that file. Fix hard failures. Treat passive-voice lines as warnings.
-5. Climb only when the prose is not enough:
-   - flow or architecture: write a `.mmd` file and run `scripts/render_diagram`
-   - exploration or comparison: write one HTML file and run `scripts/verify_html`
-   - time or density: write a storyboard with the headings Hook, Mechanism, and Check, then run `scripts/render_video`
-6. Hand the reader the artifacts that were actually needed.
+Video is not the default. Say the render cost before you start one. If it fails, fall back to the HTML page and say so.
 
-`scripts/render_video` checks the storyboard. It does not build a video. ffmpeg, Manim, and text-to-speech are optional later steps. HeyGen is not required.
+The ASD-STE100 notes here are a working subset, not the official specification. See [asd-ste100.org](https://www.asd-ste100.org/).
 
 ## Layout
 
 ```text
 illuminati/
 ├── SKILL.md
-├── README.md
 ├── references/
 │   ├── ste100.md
 │   ├── diagram.md
@@ -43,4 +36,8 @@ illuminati/
     └── render_video
 ```
 
-The scripts are the harness. The reference files say when to use each rung and what the script checks.
+The scripts are optional checks. Call them by a path relative to this folder (`scripts/verify_ste`). They do not replace the ladder in `SKILL.md`.
+
+## Install
+
+Copy this folder into the skills directory your agent reads. Restart the session so it picks the skill up.
