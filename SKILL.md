@@ -1,52 +1,84 @@
 ---
 name: illuminati
 description: >
-  Use when someone wants to understand, review, or oversee something complex
-  (code, a system, a paper, a plan, a concept, or an agent's own work).
-  Pick the most digestible format instead of a wall of prose: controlled
-  text, then a diagram, then one interactive HTML page, then an explainer
-  video. Also when they type /illuminati.
+  Use when someone must understand technical knowledge, not just read cleaner
+  prose. Simplify language, remove ambiguity, keep one term for one concept,
+  break a hard idea apart, add an example, draw a diagram when relationships
+  matter, and check that nothing important was lost. STE100-style writing is
+  one technique inside this skill, not the skill itself. Also when they type
+  /illuminati.
 ---
 
 # illuminati
 
-The goal is one check the reader can do. Pick Explain, Visualize, Demonstrate, Simulate, or Animate. Do not do all five.
+STE100 optimizes technical English for comprehension. Illuminati optimizes technical knowledge for comprehension.
 
-Premise: code is cheap, so a custom diagram, page, or short video is worth making when it helps a person check the work. Do not default to long prose.
-
-## Trigger
-
-Use this when the reader says "explain", "help me understand", "walk me through", "what did you just change", "summarize this", or "make this easier to follow". Also use it when a plain-text answer would be long, dense, or split into parts.
-
-## The ladder
+Simplified Technical English is one technique inside this skill. It is an inspiration, not a compliance target. Do not mangle an established technical name to satisfy an aviation writing rule.
 
 ```text
-illuminati
-├── Explain
-├── Visualize
-├── Demonstrate
-├── Simulate
-└── Animate
+Illuminati
+├── Simplify language
+│      └── STE100-inspired rules
+├── Remove ambiguity
+├── Normalize terminology
+├── Break complex concepts apart
+├── Add examples
+├── Draw diagrams when useful
+└── Verify comprehensibility
 ```
 
-Each step is a different kind of check. Do not do all five. Pick the first one that lets the reader verify the claim, then add one step only if that check is still blind.
+## Rules
 
-| Step | The reader can | Deliver |
-| --- | --- | --- |
-| Explain | Say what it does, in a few sentences | Controlled text in the message. A small Markdown table if the comparison is short. |
-| Visualize | See how the pieces connect | A Mermaid diagram in the chat. An image only when Mermaid cannot say it. |
-| Demonstrate | Walk one real case | A page, a CSV, a PDF, or a longer Markdown file with one worked example. Attach it. |
-| Simulate | Change an input and see the result | One interactive HTML file: a slider, a step button, or a side-by-side compare. |
-| Animate | Watch the change over time | A short video, only if a still page cannot show it, or the reader asked. Say the cost first. |
+1. Use the simplest word that preserves the meaning.
+2. One concept per sentence when possible.
+3. One instruction per sentence.
+4. Prefer active voice.
+5. Use one term for one concept.
+6. Never introduce a synonym merely for variety.
+7. Explain an abbreviation before you rely on it.
+8. Preserve established technical names. `distributed agent execution environment` stays that name if that is the name. Do not split it to satisfy a three-word noun limit.
+9. Split a long causal chain into separate sentences.
+10. Show an example for an abstract concept.
+11. Use a diagram when relationships matter more than prose.
+12. Never simplify away technically important information.
 
-### How to choose
+Rule 12 wins over every other rule. If a short sentence would drop a condition, a unit, a name, or a failure mode, keep the information and split the sentence.
 
-- A few sentences stay at Explain. Do not add a picture to look thorough.
-- If the reader must check structure, start at Visualize.
-- If they must follow one case, use Demonstrate.
-- If they must try a "what if", use Simulate. A static page is Demonstrate, not Simulate.
-- Animate last. If render fails, say so and fall back to Simulate.
-- If you are unsure, deliver Explain and offer the one next step. Do not ask a list of questions.
+## STE100-inspired writing
+
+Use this only for the words, not as the goal. A working subset, not the official specification:
+
+- Prefer a simple verb when it means the same thing. `start` instead of `commence`. `fill` instead of `replenish`.
+- One approved meaning per word. Do not reuse a word for a second meaning.
+- A procedural sentence is about 20 words. A descriptive sentence is about 25. A descriptive paragraph is about 6 sentences.
+- One instruction per sentence. Active voice for a procedure.
+- Do not drop `the`, `a`, or `this`.
+- A warning is its own sentence, before the step it protects.
+- A noun cluster of more than 3 words is a signal to check. If the cluster is an established technical name, keep it.
+
+Example of the writing technique only:
+
+> It is imperative that the operator ensures the hydraulic reservoir is replenished prior to commencing operation.
+
+becomes:
+
+> Make sure that the hydraulic reservoir is full before you start the operation.
+
+That rewrite is not the skill. The skill is the list above. The writing rules are step 1.
+
+Optional word check: `scripts/verify_ste <file>`. It flags long sentences and filler. It does not decide whether the knowledge is intact.
+
+## When to leave prose
+
+After the language is simple and the terms are stable:
+
+- Add a concrete example when the concept is abstract.
+- Draw a diagram when the reader must see a relationship, a flow, or a structure. In Grok Bot, use a fenced `mermaid` block. Attach an image only when Mermaid cannot say it.
+- Attach a worked case (HTML, CSV, PDF, or a longer Markdown file) when one example must be followed in detail.
+- Add a control the reader can change only when they must try a "what if".
+- Make a short video only when the reader asks, or when a still picture cannot show change over time. Say the cost first. If it fails, say so and keep the still artifact.
+
+Do not produce every form. Stop when the reader can check the claim without losing a technical fact.
 
 
 ## Grok Bot surfaces
