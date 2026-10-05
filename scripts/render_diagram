@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# Validate a mermaid file. Render SVG only when mmdc exists. Never invent a PNG.
+set -euo pipefail
+if [[ $# -ne 1 ]]; then
+  echo "usage: render_diagram FILE.mmd" >&2
+  exit 2
+fi
+if [[ ! -f "$1" ]]; then
+  echo "render_diagram: not a file: $1" >&2
+  exit 2
+fi
+case "$1" in
+  *.mmd) ;;
+  *)
+    echo "render_diagram: expected a .mmd file: $1" >&2
+    exit 2
+    ;;
+esac
+exec python3 - "$1" << 'PY'
+import shutil
+import subprocess
+import sys
+
+path = sys.argv[1]
+keywords = {
+    "flowchart",
+    "graph",
+    "sequenceDiagram",
+    "classDiagram",
+    "stateDiagram",
+    "stateDiagram-v2",
+    "erDiagram",
+    "journey",
+    "gantt",
+    "pie",
+    "mindmap",
+    "timeline",
+    "gitGraph",
+    "quadrantChart",
+    "requirementDiagram",
+    "C4Context",
+    "C4Container",
+    "C4Component",
+    "block-beta",
+    "xychart-beta",
+    "sankey-beta",
+    "packet-beta",
+    "architecture-beta",
+    "kanban",
+}
+text = open(path, encoding="utf-8").read().replace("\r\n", "\n")
+first = ""
+for line in text.split("\n"):
+    stripped = line.strip()
+    if not stripped or stripped.startswith("%%"):
+        continue
+    first = stripped.split()[0]
+    break
+if first not in keywords:
+    print(f"render_diagram: first mermaid keyword is missing or unknown: {first!r}", file=sys.stderr)
+    sys.exit(1)
+
+mmdc = shutil.which("mmdc")
+if mmdc:
+    out = path[:-4] + ".svg" if path.endswith(".mmd") else path + ".svg"
+    proc = subprocess.run([mmdc, "-i", path, "-o", out], check=False)
+    if proc.returncode != 0:
+        print("render_diagram: mmdc failed; no SVG was accepted", file=sys.stderr)
+        sys.exit(proc.returncode)
+    print(f"rendered {out}")
+    sys.exit(0)
+
+print("renderer not installed, diagram source is valid if it starts with a mermaid keyword")
+sys.stdout.write(text if text.endswith("\n") else text + "\n")
+sys.exit(0)
+PY

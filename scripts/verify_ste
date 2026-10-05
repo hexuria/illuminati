@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# Check a controlled-prose file against the illuminati limits.
+set -euo pipefail
+if [[ $# -ne 1 ]]; then
+  echo "usage: verify_ste FILE" >&2
+  exit 2
+fi
+if [[ ! -f "$1" ]]; then
+  echo "verify_ste: not a file: $1" >&2
+  exit 2
+fi
+exec python3 - "$1" << 'PY'
+import re
+import sys
+
+path = sys.argv[1]
+raw = open(path, encoding="utf-8").read()
+raw = raw.replace("\r\n", "\n").replace("\r", "\n")
+raw = re.sub(r"```.*?```", " ", raw, flags=re.S)
+kept = []
+for line in raw.split("\n"):
+    if re.match(r"\s*#", line):
+        continue
+    line = re.sub(r"^\s*[-*]\s+", "", line)
+    line = re.sub(r"^\s*\d+\.\s+", "", line)
+    kept.append(line)
+body = " ".join(kept)
+body = body.replace("`", " ")
+body = re.sub(r"\s+", " ", body).strip()
+parts = re.split(r"(?<=[.!?])\s+", body) if body else []
+
+word_re = re.compile(r"[A-Za-z0-9]+(?:'[A-Za-z]+)?")
+ban_re = re.compile(r"\b(various|etc|appropriate|simply|just)\b", re.I)
+# Noisy on purpose. Warnings only. Not a grammar parser.
+passive_re = re.compile(
+    r"\b(?:is|are|was|were|be|been|being)\s+"
+    r"(?:[A-Za-z]+ed|known|shown|written|read|made|given|sent|built|done|seen|found|left|held|kept|set|put|run|begun)\b",
+    re.I,
+)
+
+long_hits = []
+ban_hits = []
+warns = []
+counted = 0
+for part in parts:
+    sentence = part.strip()
+    if not sentence:
+        continue
+    words = word_re.findall(sentence)
+    if not words:
+        continue
+    counted += 1
+    if len(words) > 25:
+        long_hits.append((counted, len(words), sentence))
+    for hit in ban_re.findall(sentence):
+        ban_hits.append((counted, hit, sentence))
+    for hit in passive_re.findall(sentence):
+        warns.append((counted, hit, sentence))
+
+print(f"verify_ste: {path}")
+print(f"sentences: {counted}")
+print(f"over_25: {len(long_hits)}")
+print(f"banned: {len(ban_hits)}")
+print(f"passive_warnings: {len(warns)}")
+for n, count, sentence in long_hits:
+    print(f"FAIL sentence {n} ({count} words): {sentence}")
+for n, word, sentence in ban_hits:
+    print(f"FAIL banned word '{word}' in sentence {n}: {sentence}")
+for n, phrase, sentence in warns:
+    print(f"WARN passive '{phrase}' in sentence {n}: {sentence}")
+if counted == 0:
+    print("FAIL: no sentences")
+    print("RESULT: FAIL")
+    sys.exit(1)
+if long_hits or ban_hits:
+    print("RESULT: FAIL")
+    sys.exit(1)
+print("RESULT: PASS")
+sys.exit(0)
+PY

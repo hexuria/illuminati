@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Validate an explainer storyboard. Do not render a video.
+set -euo pipefail
+if [[ $# -ne 1 ]]; then
+  echo "usage: render_video STORYBOARD.md" >&2
+  exit 2
+fi
+if [[ ! -f "$1" ]]; then
+  echo "render_video: not a file: $1" >&2
+  exit 2
+fi
+exec python3 - "$1" << 'PY'
+import re
+import shutil
+import sys
+
+path = sys.argv[1]
+text = open(path, encoding="utf-8").read().replace("\r\n", "\n")
+heads = [m.strip() for m in re.findall(r"^#{1,6}[ \t]+(.+?)\s*$", text, flags=re.M)]
+need = ["Hook", "Mechanism", "Check"]
+missing = [name for name in need if name not in heads]
+print(f"render_video: {path}")
+print("video render is optional")
+print("headings: " + (", ".join(heads) if heads else "(none)"))
+if missing:
+    print("FAIL missing headings: " + ", ".join(missing))
+    print("RESULT: FAIL")
+    sys.exit(1)
+if shutil.which("ffmpeg") is None:
+    print("script-only, ffmpeg not installed")
+    print("RESULT: PASS")
+    sys.exit(0)
+print("ffmpeg is installed; no video file was written")
+print("RESULT: PASS")
+sys.exit(0)
+PY

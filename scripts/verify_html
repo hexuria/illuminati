@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# Check one self-contained HTML file. No network URLs. Tags must balance.
+set -euo pipefail
+if [[ $# -ne 1 ]]; then
+  echo "usage: verify_html FILE.html" >&2
+  exit 2
+fi
+if [[ ! -f "$1" ]]; then
+  echo "verify_html: not a file: $1" >&2
+  exit 2
+fi
+exec python3 - "$1" << 'PY'
+import re
+import sys
+from html.parser import HTMLParser
+
+path = sys.argv[1]
+raw = open(path, encoding="utf-8").read()
+size = len(raw.encode("utf-8"))
+errors = []
+print(f"verify_html: {path}")
+print(f"bytes: {size}")
+
+if size < 64:
+    errors.append("file is too small to be a page")
+if size > 2_000_000:
+    errors.append("file is over 2 MB")
+
+title = re.search(r"<title>\s*([^<]+?)\s*</title>", raw, flags=re.I | re.S)
+if not title:
+    errors.append("missing or empty <title>")
+else:
+    print(f"title: {title.group(1).strip()}")
+
+attr_re = re.compile(
+    r"""(?:\b(?:src|href|action)\s*=\s*)(?:"([^"]*)"|'([^']*)')""",
+    re.I,
+)
+css_url_re = re.compile(r"""url\(\s*(['"]?)([^)'"]+)\1\s*\)""", re.I)
+
+def check_ref(value, where):
+    v = value.strip()
+    if not v or v.startswith("#") or v.lower().startswith("data:"):
+        return
+    low = v.lower()
+    if low.startswith("http:") or low.startswith("https:") or low.startswith("//"):
+        errors.append(f"external URL in {where}: {v}")
+        return
+    if ":" in v.split("/")[0]:
+        errors.append(f"unsupported URL in {where}: {v}")
+        return
+    errors.append(f"reference is not self-contained in {where}: {v}")
+
+for match in attr_re.finditer(raw):
+    check_ref(match.group(1) if match.group(1) is not None else match.group(2), "src/href/action")
+for match in css_url_re.finditer(raw):
+    check_ref(match.group(2), "css url()")
+
+stripped = re.sub(r"<!--.*?-->", "", raw, flags=re.S)
+stripped = re.sub(r"<script\b[^>]*>.*?</script>", "", stripped, flags=re.S | re.I)
+stripped = re.sub(r"<style\b[^>]*>.*?</style>", "", stripped, flags=re.S | re.I)
+
+VOID = {
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "link",
+    "meta", "param", "source", "track", "wbr",
+}
+
+class Balance(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.stack = []
+        self.problems = []
+
+    def handle_starttag(self, tag, attrs):
+        tag = tag.lower()
+        if tag in VOID:
+            return
+        self.stack.append(tag)
+
+    def handle_endtag(self, tag):
+        tag = tag.lower()
+        if tag in VOID:
+            return
+        if not self.stack:
+            self.problems.append(f"extra end tag </{tag}>")
+            return
+        if self.stack[-1] == tag:
+            self.stack.pop()
+            return
+        if tag in self.stack:
+            while self.stack and self.stack[-1] != tag:
+                self.problems.append(f"unclosed <{self.stack[-1]}> before </{tag}>")
+                self.stack.pop()
+            if self.stack and self.stack[-1] == tag:
+                self.stack.pop()
+            return
+        self.problems.append(f"end tag </{tag}> does not match <{self.stack[-1]}>")
+
+    def close(self):
+        super().close()
+        while self.stack:
+            self.problems.append(f"unclosed <{self.stack.pop()}>")
+
+parser = Balance()
+try:
+    parser.feed(stripped)
+    parser.close()
+except Exception as exc:
+    errors.append(f"html parser error: {exc}")
+else:
+    errors.extend(parser.problems)
+
+if errors:
+    for item in errors:
+        print(f"FAIL: {item}")
+    print("RESULT: FAIL")
+    sys.exit(1)
+print("RESULT: PASS")
+sys.exit(0)
+PY
